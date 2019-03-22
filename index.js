@@ -17,9 +17,12 @@ app.get('/v1/judge-submission', function (req, res) {
     res.send('403 Forbidden');
 });
 app.post('/v1/judge-submission', function (req, res) {
-    let result = judgeUtils.judgeSubmission(req.body.problemID, req.body.userID, req.body.inputCode);
-    res.send(result);
+    judgeUtils.judgeSubmission(req.body.problemID, req.body.userID, req.body.inputCode, req.body.lang, function(result) {
+        res.send(result);
+    });
+
 });
 
 app.listen(port, () => console.log(`Grading Server listening on port ${port}!`));
+
 
