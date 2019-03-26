@@ -1,2 +1,2 @@
 # BayviewJudge-Grader
-Let's try to write a judge grader!!!
+Grader for BayviewJudge.
