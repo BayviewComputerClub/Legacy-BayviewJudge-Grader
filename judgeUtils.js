@@ -5,18 +5,20 @@ const { spawn, exec } = require('child_process');
 function scoreOutput(output, expectedOutput, callback) {
     let score = 0;
     if (typeof output == 'undefined') {
-        console.log('[Error] Output is undefined.')
-        output == "error";
+        console.log('[Error] Output is undefined.');
+        output = "error";
     }
     for(let i = 0; i < expectedOutput.length; i++) {
         // Ignore newlines in the test cases
         //console.log("*********LOOK AT THIS:" + typeof expectedOutput[i] + " - " + typeof output[i]);
-
-        if(expectedOutput[i].replace(/(\r\n|\n|\r)/gm, "") === output[i].replace(/(\r\n|\n|\r)/gm, "")) {
-            console.log("Right answer! Expected: " + expectedOutput[i] + " and got: " + output[i]);
+        console.log("[Debug] Judge Iteration " + i);
+        let strippedExpectedOuput = expectedOutput[i].replace(/(\r\n|\n|\r)/gm, "");
+        let strippedOutput = output[i].replace(/(\r\n|\n|\r)/gm, "");
+        if(strippedExpectedOuput === strippedOutput) {
+            console.log("[Debug] Right answer! Expected: " + strippedExpectedOuput + " and got: " + strippedOutput);
             score++;
         } else {
-            console.log("Wrong answer! Expected: " + expectedOutput[i] + " but got: " + output[i]);
+            console.log("[Debug] Wrong answer! Expected: " + strippedExpectedOuput + " but got: " + strippedOutput);
             callback(score, false, i);
             return;
         }
@@ -25,17 +27,25 @@ function scoreOutput(output, expectedOutput, callback) {
     return;
 }
 
-function judgeSubmission(problemID, userID, inputCode, lang, callback) {
+function judgeSubmission(problemID, userID, inputCode, lang, input, output, callback) {
     console.log("[Info] Judging a submission.");
     let result = {accepted: false, time: -1, isTLE: false, isCompileError: false, otherError: false, errorAt: -1, score: -1};
 
     const problemRoot = './problems/' + problemID;
 
     // Load the problem metadata (Timemout and Mem Limit)
-    const problemMeta = JSON.parse(fs.readFileSync(problemRoot + '/meta.json'));
+    //const problemMeta = JSON.parse(fs.readFileSync('1' + '/meta.json'));
     // Load the test cases
-    const testInput = fs.readFileSync(problemRoot + '/in.txt').toString().split("\n");
-    const testOutput = fs.readFileSync(problemRoot + '/out.txt').toString().split("\n");
+    //const testInput = fs.readFileSync(problemRoot + '/in.txt').toString().split("\n");
+    //const testOutput = fs.readFileSync(problemRoot + '/out.txt').toString().split("\n");
+
+    const testInput = new Buffer(input, 'base64').toString('ascii').split("\n");
+    const testOutput = new Buffer(output, 'base64').toString('ascii').split("\n");
+
+    console.log('[Info] Parsed Input and Output Cases');
+    console.log('[Debug] Input Cases: ' + testInput[0]);
+    console.log('[Debug] Output Cases: ' + testOutput[0]);
+
 
     // Please ignore callback hell
     switch (lang){
@@ -58,7 +68,7 @@ function judgeSubmission(problemID, userID, inputCode, lang, callback) {
                         callback(result);
                         return
                     }
-                    console.log('[Log] Compiled a file with ID: ' + userID)
+                    console.log('[Log] Compiled a file with ID: ' + userID);
 
                     // Mark the file as executable
                     exec('chmod +x ./tmp/' + userID + '.out', (err, stdout, stderr) => {
@@ -79,8 +89,11 @@ function judgeSubmission(problemID, userID, inputCode, lang, callback) {
                         // Capture the programs output as it happens
                         let inputProcessOutput = [];
                         inputProcess.stdout.on('data', function(data) {
-                            //console.log('******************* got data and pushing it... ' + data.toString());
-                            inputProcessOutput = data.toString().split("\n");
+                            console.log('******************* got data and pushing it... ' + data.toString().split("\n"));
+                            console.log(typeof data.toString().split("\n"));
+                            let dataOutput = data.toString().split("\n");
+                            inputProcessOutput = inputProcessOutput.concat(dataOutput);
+                            inputProcessOutput.pop();
                         });
 
                         for(let i of testInput) {
@@ -92,11 +105,11 @@ function judgeSubmission(problemID, userID, inputCode, lang, callback) {
                         inputProcess.on('close', function(code) {
                             // Judge the captured output of the program
                             for(let i of inputProcessOutput) { //debug
-                                //console.log('WHATS IN THE ' + i);
+                                console.log('WHATS IN THE ' + i);
                             }
 
                             scoreOutput(inputProcessOutput, testOutput, function(score, isAccepeted, errorAt) {
-                               if(isAccepeted == false) {
+                               if(isAccepeted === false) {
                                    result.accepted = false;
                                    result.errorAt = errorAt;
                                    callback(result);
@@ -110,7 +123,9 @@ function judgeSubmission(problemID, userID, inputCode, lang, callback) {
                             });
                         });
 
-                        inputProcess.stdin.end();
+                        // TLE
+                        setTimeout(function(){ inputProcess.stdin.end(); inputProcess.kill(); }, 3000);
+
 
                     });
                 });
@@ -121,10 +136,6 @@ function judgeSubmission(problemID, userID, inputCode, lang, callback) {
             callback(result);
             break;
     }
-
-
-
-
 
 
 }

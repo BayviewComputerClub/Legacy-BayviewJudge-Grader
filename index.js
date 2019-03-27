@@ -17,7 +17,7 @@ app.get('/v1/judge-submission', function (req, res) {
     res.send('403 Forbidden');
 });
 app.post('/v1/judge-submission', function (req, res) {
-    judgeUtils.judgeSubmission(req.body.problemID, req.body.userID, req.body.inputCode, req.body.lang, function(result) {
+    judgeUtils.judgeSubmission(req.body.problemID, req.body.userID, req.body.inputCode, req.body.lang, req.body.input, req.body.output, function(result) {
         res.send(result);
     });
 
