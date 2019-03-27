@@ -4,9 +4,15 @@ const { spawn, exec } = require('child_process');
 
 function scoreOutput(output, expectedOutput, callback) {
     let score = 0;
+    if (typeof output == 'undefined') {
+        console.log('[Error] Output is undefined.')
+        output == "error";
+    }
     for(let i = 0; i < expectedOutput.length; i++) {
         // Ignore newlines in the test cases
-        if(expectedOutput[i].replace(/[^a-zA-Z]/g, "") === output[i].replace(/[^a-zA-Z]/g, "")) {
+        //console.log("*********LOOK AT THIS:" + typeof expectedOutput[i] + " - " + typeof output[i]);
+
+        if(expectedOutput[i].replace(/(\r\n|\n|\r)/gm, "") === output[i].replace(/(\r\n|\n|\r)/gm, "")) {
             console.log("Right answer! Expected: " + expectedOutput[i] + " and got: " + output[i]);
             score++;
         } else {
@@ -21,7 +27,7 @@ function scoreOutput(output, expectedOutput, callback) {
 
 function judgeSubmission(problemID, userID, inputCode, lang, callback) {
     console.log("[Info] Judging a submission.");
-    let result = {accepted: true, time: -1, isTLE: false, isCompileError: false, otherError: false, errorAt: -1, score: -1};
+    let result = {accepted: false, time: -1, isTLE: false, isCompileError: false, otherError: false, errorAt: -1, score: -1};
 
     const problemRoot = './problems/' + problemID;
 
@@ -49,6 +55,8 @@ function judgeSubmission(problemID, userID, inputCode, lang, callback) {
                         console.log('File compile ERROR');
                         result.isCompileError = true;
                         result.accepted = false;
+                        callback(result);
+                        return
                     }
                     console.log('[Log] Compiled a file with ID: ' + userID)
 
@@ -61,7 +69,9 @@ function judgeSubmission(problemID, userID, inputCode, lang, callback) {
                         }
 
                         // Time for some fun... run and judge the solution!
-                        let inputProcess = spawn('firejail', ['--seccomp', '--quiet', '--net=none', './tmp/' + userID + '.out']);
+                        // Enable Firejail on the Linux server.
+                        //let inputProcess = spawn('firejail', ['--seccomp', '--quiet', '--net=none', './tmp/' + userID + '.out']);
+                        let inputProcess = spawn('./tmp/' + userID + '.out');
 
                         inputProcess.stdin.setEncoding('utf-8');
                         //inputProcess.stdout.pipe(process.stdout); // debug
