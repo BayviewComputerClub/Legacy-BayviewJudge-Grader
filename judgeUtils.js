@@ -46,96 +46,115 @@ function judgeSubmission(problemID, userID, inputCode, lang, input, output, call
     console.log('[Debug] Input Cases: ' + testInput[0]);
     console.log('[Debug] Output Cases: ' + testOutput[0]);
 
+    let compileCommand = "echo oof";
+    let chmodCommand = "echo oof";
+    let spawnCommand = "echo";
 
-    // Please ignore callback hell
+    let fileName = '';
+    let execName = '';
+
     switch (lang){
         case "c++":
+            compileCommand = 'g++ ./tmp/' + userID + '.cpp -o ./tmp/' + userID + '.out';
+            chmodCommand = 'chmod +x ./tmp/' + userID + '.out';
+            spawnCommand = './tmp/' + userID + '.out';
+            fileName = './tmp/' + userID + '.cpp';
+            break;
+        case "java":
+            // HACK! Todo:Make user folders
+            compileCommand = 'javac Main.java -cp tmp/';
+            chmodCommand = 'mv Main.class ./tmp/Main.class';
+            spawnCommand = 'java';
+            fileName = './tmp/Main.java';
+            execName = "Main";
+            break;
+        default:
+            break;
+    }
 
-            // decode and save the code.
-            let buff = new Buffer(inputCode, 'base64');
-            let inputCodeString = buff.toString('ascii');
+    // Please ignore callback hell
 
-            fs.writeFile('./tmp/' + userID + '.cpp', inputCodeString, (err) => {
-                if (err) throw err;
+    // decode and save the code.
+    let buff = new Buffer(inputCode, 'base64');
+    let inputCodeString = buff.toString('ascii');
 
-                // Compile the input code (Inside firejail)
-                //firejail --apparmor --private --net=none --quiet
-                exec('g++ ./tmp/' + userID + '.cpp -o ./tmp/' + userID + '.out', (err, stdout, stderr) => {
-                    if (err) {
-                        console.log('File compile ERROR');
-                        result.isCompileError = true;
-                        result.accepted = false;
-                        callback(result);
-                        return
+    fs.writeFile(fileName, inputCodeString, (err) => {
+        if (err) throw err;
+
+        // Compile the input code (Inside firejail)
+        //firejail --apparmor --private --net=none --quiet
+        exec(compileCommand, (err, stdout, stderr) => {
+            if (err) {
+                console.log('File compile ERROR');
+                result.isCompileError = true;
+                result.accepted = false;
+                callback(result);
+                return
+            }
+            console.log('[Log] Compiled a file with ID: ' + userID);
+
+            // Mark the file as executable
+            exec(chmodCommand, (err, stdout, stderr) => {
+                if (err) {
+                    console.log('File compile ERROR');
+                    result.isCompileError = true;
+                    result.accepted = false;
+                }
+
+                // Time for some fun... run and judge the solution!
+                // Enable Firejail on the Linux server.
+                //let inputProcess = spawn('firejail', ['--seccomp', '--quiet', '--net=none', './tmp/' + userID + '.out']);
+                let inputProcess = spawn(spawnCommand, ['-cp', 'tmp/', execName]);
+
+                inputProcess.stdin.setEncoding('utf-8');
+                //inputProcess.stdout.pipe(process.stdout); // debug
+
+                // Capture the programs output as it happens
+                let inputProcessOutput = [];
+                inputProcess.stdout.on('data', function(data) {
+                    console.log('******************* got data and pushing it... ' + data.toString().split("\n"));
+                    console.log(typeof data.toString().split("\n"));
+                    let dataOutput = data.toString().split("\n");
+                    inputProcessOutput = inputProcessOutput.concat(dataOutput);
+                    inputProcessOutput.pop();
+                });
+
+                for(let i of testInput) {
+                    //console.log('this is i ' + i)
+                    inputProcess.stdin.write(i + '\n');
+                }
+
+                // When the program exits.
+                inputProcess.on('close', function(code) {
+                    // Judge the captured output of the program
+                    for(let i of inputProcessOutput) { //debug
+                        console.log('WHATS IN THE ' + i);
                     }
-                    console.log('[Log] Compiled a file with ID: ' + userID);
 
-                    // Mark the file as executable
-                    exec('chmod +x ./tmp/' + userID + '.out', (err, stdout, stderr) => {
-                        if (err) {
-                            console.log('File compile ERROR');
-                            result.isCompileError = true;
+                    scoreOutput(inputProcessOutput, testOutput, function(score, isAccepeted, errorAt) {
+                        if(isAccepeted === false) {
                             result.accepted = false;
+                            result.errorAt = errorAt;
+                            callback(result);
+                            return;
+                        } else {
+                            result.accepted = true;
+                            result.score = score;
+                            callback(result);
+                            return;
                         }
-
-                        // Time for some fun... run and judge the solution!
-                        // Enable Firejail on the Linux server.
-                        //let inputProcess = spawn('firejail', ['--seccomp', '--quiet', '--net=none', './tmp/' + userID + '.out']);
-                        let inputProcess = spawn('./tmp/' + userID + '.out');
-
-                        inputProcess.stdin.setEncoding('utf-8');
-                        //inputProcess.stdout.pipe(process.stdout); // debug
-
-                        // Capture the programs output as it happens
-                        let inputProcessOutput = [];
-                        inputProcess.stdout.on('data', function(data) {
-                            console.log('******************* got data and pushing it... ' + data.toString().split("\n"));
-                            console.log(typeof data.toString().split("\n"));
-                            let dataOutput = data.toString().split("\n");
-                            inputProcessOutput = inputProcessOutput.concat(dataOutput);
-                            inputProcessOutput.pop();
-                        });
-
-                        for(let i of testInput) {
-                            //console.log('this is i ' + i)
-                            inputProcess.stdin.write(i + '\n');
-                        }
-
-                        // When the program exits.
-                        inputProcess.on('close', function(code) {
-                            // Judge the captured output of the program
-                            for(let i of inputProcessOutput) { //debug
-                                console.log('WHATS IN THE ' + i);
-                            }
-
-                            scoreOutput(inputProcessOutput, testOutput, function(score, isAccepeted, errorAt) {
-                               if(isAccepeted === false) {
-                                   result.accepted = false;
-                                   result.errorAt = errorAt;
-                                   callback(result);
-                                   return;
-                               } else {
-                                   result.accepted = true;
-                                   result.score = score;
-                                   callback(result);
-                                   return;
-                               }
-                            });
-                        });
-
-                        // TLE
-                        setTimeout(function(){ inputProcess.stdin.end(); inputProcess.kill(); }, 3000);
-
-
                     });
                 });
 
+                // TLE
+                setTimeout(function(){ inputProcess.stdin.end(); inputProcess.kill(); }, 3000);
+
+
             });
-            break;
-        case "java":
-            callback(result);
-            break;
-    }
+        });
+
+    });
+
 
 
 }
