@@ -2,6 +2,14 @@
 const fs = require("fs");
 const { spawn, exec } = require('child_process');
 
+// Cores
+const CompileCore = require('./Core/Compile/CompileCore');
+const PrepareCore = require('./Core/Prepare/PrepareCore');
+const StageCore = require('./Core/Stage/StageCore');
+const ExecCore = require('./Core/Execute/ExecCore');
+const CleanupCore = require('./Core/Cleanup/CleanupCore');
+
+
 function scoreOutput(output, expectedOutput, callback) {
     let score = 0;
     if (typeof output == 'undefined') {
@@ -22,6 +30,7 @@ function scoreOutput(output, expectedOutput, callback) {
             callback(score, false, i);
             return;
         }
+
     }
     callback(score, true, -1);
     return;
@@ -29,7 +38,11 @@ function scoreOutput(output, expectedOutput, callback) {
 
 function judgeSubmission(problemID, userID, inputCode, lang, input, output, callback) {
     console.log("[Info] Judging a submission.");
-    let result = {accepted: false, time: -1, isTLE: false, isCompileError: false, otherError: false, errorAt: -1, score: -1};
+    let judgeResult = {accepted: false, time: -1, isTLE: false, isCompileError: false, otherError: false, errorAt: -1, score: -1};
+
+    // Create a submission request object.
+    // input & output are the expected test case
+    let submissionRequest = {problemID: problemID, userID: userID, inputCode: inputCode, lang: lang, input: input, output: output};
 
     const problemRoot = './problems/' + problemID;
 
@@ -42,112 +55,68 @@ function judgeSubmission(problemID, userID, inputCode, lang, input, output, call
     const testInput = new Buffer(input, 'base64').toString('ascii').split("\n");
     const testOutput = new Buffer(output, 'base64').toString('ascii').split("\n");
 
+    // Place decoded JSON into request object
+    submissionRequest.input = testInput;
+    submissionRequest.output = testOutput;
+
     console.log('[Info] Parsed Input and Output Cases');
     console.log('[Debug] Input Cases: ' + testInput[0]);
     console.log('[Debug] Output Cases: ' + testOutput[0]);
 
-    let compileCommand = "echo oof";
-    let chmodCommand = "echo oof";
-    let spawnCommand = "echo";
-
-    let fileName = '';
-    let execName = '';
-
-    switch (lang){
-        case "c++":
-            compileCommand = 'g++ ./tmp/' + userID + '.cpp -o ./tmp/' + userID + '.out';
-            chmodCommand = 'chmod +x ./tmp/' + userID + '.out';
-            spawnCommand = './tmp/' + userID + '.out';
-            fileName = './tmp/' + userID + '.cpp';
-            break;
-        case "java":
-            // HACK! Todo:Make user folders
-            compileCommand = 'javac Main.java -cp tmp/';
-            chmodCommand = 'mv Main.class ./tmp/Main.class';
-            spawnCommand = 'java';
-            fileName = './tmp/Main.java';
-            execName = "Main";
-            break;
-        default:
-            break;
-    }
 
     // Please ignore callback hell
+
+    // Execution Flow: Prepare -> Compile -> Stage -> Execute -> Cleanup
+    // Then respond with the score.
 
     // decode and save the code.
     let buff = new Buffer(inputCode, 'base64');
     let inputCodeString = buff.toString('ascii');
 
-    fs.writeFile(fileName, inputCodeString, (err) => {
-        if (err) throw err;
+    // Place into request
+    submissionRequest.inputCode = inputCodeString;
+
+
+    PrepareCore.prepareSubmission(submissionRequest, (prepareResult) => {
 
         // Compile the input code (Inside firejail)
         //firejail --apparmor --private --net=none --quiet
-        exec(compileCommand, (err, stdout, stderr) => {
-            if (err) {
-                console.log('File compile ERROR');
-                result.isCompileError = true;
-                result.accepted = false;
-                callback(result);
-                return
-            }
-            console.log('[Log] Compiled a file with ID: ' + userID);
+
+
+        CompileCore.compileSubmission(submissionRequest, (compileResult) => {
+            console.log("***** We have compileda the file");
 
             // Mark the file as executable
-            exec(chmodCommand, (err, stdout, stderr) => {
-                if (err) {
-                    console.log('File compile ERROR');
-                    result.isCompileError = true;
-                    result.accepted = false;
-                }
+            StageCore.stageSubmission(submissionRequest, (stageResult) => {
 
-                // Time for some fun... run and judge the solution!
-                // Enable Firejail on the Linux server.
-                //let inputProcess = spawn('firejail', ['--seccomp', '--quiet', '--net=none', './tmp/' + userID + '.out']);
-                let inputProcess = spawn(spawnCommand, ['-cp', 'tmp/', execName]);
+                console.log("***** We have staged the file");
 
-                inputProcess.stdin.setEncoding('utf-8');
-                //inputProcess.stdout.pipe(process.stdout); // debug
+                ExecCore.execSubmission(submissionRequest, (execResult, inputProcessOutput) => {
 
-                // Capture the programs output as it happens
-                let inputProcessOutput = [];
-                inputProcess.stdout.on('data', function(data) {
-                    console.log('******************* got data and pushing it... ' + data.toString().split("\n"));
-                    console.log(typeof data.toString().split("\n"));
-                    let dataOutput = data.toString().split("\n");
-                    inputProcessOutput = inputProcessOutput.concat(dataOutput);
-                    inputProcessOutput.pop();
-                });
+                    console.log("***** We have exec the file");
+                    console.log(inputProcessOutput[0]);
 
-                for(let i of testInput) {
-                    //console.log('this is i ' + i)
-                    inputProcess.stdin.write(i + '\n');
-                }
-
-                // When the program exits.
-                inputProcess.on('close', function(code) {
-                    // Judge the captured output of the program
-                    for(let i of inputProcessOutput) { //debug
-                        console.log('WHATS IN THE ' + i);
-                    }
-
-                    scoreOutput(inputProcessOutput, testOutput, function(score, isAccepeted, errorAt) {
+                    scoreOutput(inputProcessOutput, submissionRequest.output, function(score, isAccepeted, errorAt) {
                         if(isAccepeted === false) {
-                            result.accepted = false;
-                            result.errorAt = errorAt;
-                            callback(result);
-                            return;
+                            judgeResult.accepted = false;
+                            judgeResult.errorAt = errorAt;
+                            CleanupCore.cleanupSubmission(submissionRequest, (result) => {
+                                callback(judgeResult);
+                                return;
+                            });
+
                         } else {
-                            result.accepted = true;
-                            result.score = score;
-                            callback(result);
-                            return;
+                            judgeResult.accepted = true;
+                            judgeResult.score = score;
+                            CleanupCore.cleanupSubmission(submissionRequest, (result) => {
+                                callback(judgeResult);
+                                return;
+                            });
                         }
                     });
                 });
 
-                // TLE
-                setTimeout(function(){ inputProcess.stdin.end(); inputProcess.kill(); }, 3000);
+
 
 
             });

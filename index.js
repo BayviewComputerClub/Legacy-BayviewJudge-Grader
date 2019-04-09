@@ -23,7 +23,7 @@ const port = 3000;
 // Load server parts
 const judgeUtils = require('./judgeUtils');
 
-// Setup middleware
+// Setup middleware to parse JSON
 app.use(express.json());
 
 app.get('/', function (req, res) {
