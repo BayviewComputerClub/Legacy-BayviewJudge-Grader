@@ -115,10 +115,6 @@ function judgeSubmission(problemID, userID, inputCode, lang, input, output, call
                         }
                     });
                 });
-
-
-
-
             });
         });
 
