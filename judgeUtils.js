@@ -88,11 +88,9 @@ function judgeSubmission(problemID, userID, inputCode, lang, input, output, call
 
             // Mark the file as executable
             StageCore.stageSubmission(submissionRequest, (stageResult) => {
-
                 console.log("***** We have staged the file");
 
                 ExecCore.execSubmission(submissionRequest, (execResult, inputProcessOutput) => {
-
                     console.log("***** We have exec the file");
                     console.log(inputProcessOutput[0]);
 

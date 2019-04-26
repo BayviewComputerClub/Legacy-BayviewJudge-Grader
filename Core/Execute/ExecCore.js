@@ -52,7 +52,7 @@ function execCppFile(submissionRequest, callback) {
 
     });
 
-    // TLE todo
+    // todo TLE
     setTimeout(function(){ inputProcess.stdin.end(); inputProcess.kill(); }, 3000);
 
 

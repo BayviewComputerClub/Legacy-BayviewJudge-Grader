@@ -42,4 +42,3 @@ app.post('/v1/judge-submission', function (req, res) {
 
 app.listen(port, () => console.log(`Grading Server listening on port ${port}!`));
 
-
