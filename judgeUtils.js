@@ -77,6 +77,11 @@ function judgeSubmission(problemID, userID, inputCode, lang, input, output, call
     submissionRequest.inputCode = inputCodeString;
 
 
+    if(submissionRequest.inputCode == "") {
+        callback(judgeResult);
+        return;
+    }
+
     PrepareCore.prepareSubmission(submissionRequest, (prepareResult) => {
 
         // Compile the input code (Inside firejail)
@@ -85,7 +90,12 @@ function judgeSubmission(problemID, userID, inputCode, lang, input, output, call
 
         CompileCore.compileSubmission(submissionRequest, (compileResult) => {
             console.log("***** We have compileda the file");
-
+            if(!compileResult) {
+                // Error in file compile (i.e CE), set it in the result object
+                judgeResult.isCompileError = true;
+                callback(judgeResult);
+                return;
+            }
             // Mark the file as executable
             StageCore.stageSubmission(submissionRequest, (stageResult) => {
                 console.log("***** We have staged the file");
