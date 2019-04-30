@@ -83,7 +83,7 @@ function execJavaFile(submissionRequest, callback) {
         console.log(typeof data.toString().split("\n"));
         let dataOutput = data.toString().split("\n");
         inputProcessOutput = inputProcessOutput.concat(dataOutput);
-        inputProcessOutput.pop();
+        //inputProcessOutput.pop();
     });
 
     // Write the test case data into the program.
