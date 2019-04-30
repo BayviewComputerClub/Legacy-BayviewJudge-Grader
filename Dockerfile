@@ -18,7 +18,7 @@ RUN apt-get install -y nodejs
 RUN apt-get install -y build-essential
 
 # Install OpenJDK build support for Java
-RUN apt-get install default-jdk
+RUN apt-get install -y default-jdk
 
 # Create judge user
 RUN useradd judge
