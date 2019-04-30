@@ -71,11 +71,8 @@ function judgeSubmission(problemID, userID, inputCode, lang, input, output, call
 
     // decode and save the code.
     let buff = new Buffer(inputCode, 'base64');
-    let inputCodeString = buff.toString('ascii');
-
     // Place into request
-    submissionRequest.inputCode = inputCodeString;
-
+    submissionRequest.inputCode = buff.toString('ascii');
 
     if(submissionRequest.inputCode == "") {
         callback(judgeResult);

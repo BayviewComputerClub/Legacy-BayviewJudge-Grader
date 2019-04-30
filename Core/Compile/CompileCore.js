@@ -11,13 +11,37 @@ function compileSubmission(submissionRequest, callback) {
                 return;
             });
             break;
+        case "java":
+            compileJavaSubmission(submissionRequest, (result) => {
+                callback(result);
+                return;
+            });
+            break;
     }
 }
 
+// C++
 function compileCppSubmission(submissionRequest, callback) {
     // Command Definitions
     let directory = './tmp/' + submissionRequest.userID + '/' + submissionRequest.problemID;
     let compileCommand = 'g++ ' + directory + '/source.cpp -o ' + directory + '/source.out';
+
+    exec(compileCommand, (err, stdout, stderr) => {
+        if (err) {
+            console.log('File compile ERROR ' + err);
+            callback(false);
+            return;
+        }
+        callback(true);
+        return;
+    });
+}
+
+// Java
+function compileJavaSubmission(submissionRequest, callback) {
+    // Command Definitions
+    let directory = './tmp/' + submissionRequest.userID + '/' + submissionRequest.problemID;
+    let compileCommand = 'cd ' + directory + ' && javac Main.java';
 
     exec(compileCommand, (err, stdout, stderr) => {
         if (err) {

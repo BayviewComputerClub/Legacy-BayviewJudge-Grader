@@ -1,3 +1,6 @@
+# Docker Container for Bayview Judge's Grader Server
+# Make sure to "npm install" before building the container
+
 FROM phusion/baseimage:0.10.2
 
 # Use baseimage-docker's init system.

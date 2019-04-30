@@ -11,6 +11,11 @@ function stageSubmission(submissionRequest, callback) {
                 return;
             });
             break;
+        case "java":
+            // There is nothing to do here.
+            callback(true);
+            return;
+            break;
     }
 }
 

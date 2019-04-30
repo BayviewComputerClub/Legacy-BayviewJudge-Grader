@@ -10,6 +10,12 @@ function execSubmission(submissionRequest, callback) {
                 return;
             });
             break;
+        case "java":
+            execJavaFile(submissionRequest, (result, inputProcessOutput) => {
+                callback(result, inputProcessOutput);
+                return;
+            });
+            break;
     }
 }
 
@@ -21,6 +27,51 @@ function execCppFile(submissionRequest, callback) {
     // Enable Firejail on the Linux server.
     //let inputProcess = spawn('firejail', ['--seccomp', '--quiet', '--net=none', './tmp/' + userID + '.out']);
     let inputProcess = spawn(directory, []);
+
+    inputProcess.stdin.setEncoding('utf-8');
+    //inputProcess.stdout.pipe(process.stdout); // debug
+
+    // Capture the programs output as it happens
+    let inputProcessOutput = [];
+    inputProcess.stdout.on('data', function(data) {
+        console.log('******************* got data and pushing it... ' + data.toString().split("\n"));
+        console.log(typeof data.toString().split("\n"));
+        let dataOutput = data.toString().split("\n");
+        inputProcessOutput = inputProcessOutput.concat(dataOutput);
+        inputProcessOutput.pop();
+    });
+
+    // Write the test case data into the program.
+    for(let i of submissionRequest.input) {
+        //console.log('this is i ' + i)
+        inputProcess.stdin.write(i + '\n');
+    }
+
+    // When the program exits.
+    inputProcess.on('close', function(code) {
+        // Judge the captured output of the program
+        for(let i of inputProcessOutput) { //debug
+            console.log('WHATS IN THE ' + i);
+        }
+        callback(true, inputProcessOutput);
+
+
+    });
+
+    // todo TLE
+    setTimeout(function(){ inputProcess.stdin.end(); inputProcess.kill(); }, 3000);
+
+
+}
+
+function execJavaFile(submissionRequest, callback) {
+
+    let directory = './tmp/' + submissionRequest.userID + '/' + submissionRequest.problemID;
+    // Create directory first.
+    // Time for some fun... run and judge the solution!
+    // Enable Firejail on the Linux server.
+    //let inputProcess = spawn('firejail', ['--seccomp', '--quiet', '--net=none', './tmp/' + userID + '.out']);
+    let inputProcess = spawn('cd ' + directory + ' && java Main' ,{ shell: true });
 
     inputProcess.stdin.setEncoding('utf-8');
     //inputProcess.stdout.pipe(process.stdout); // debug

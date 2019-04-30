@@ -11,12 +11,19 @@ function cleanupSubmission(submissionRequest, callback) {
                 return;
             });
             break;
+        case "java":
+            cleanupCppFile(submissionRequest, (result) => {
+                callback(result);
+                return;
+            });
+            break;
+
     }
 }
 
 function cleanupCppFile(submissionRequest, callback) {
     let directory = './tmp/' + submissionRequest.userID + '/' + submissionRequest.problemID;
-    // Create directory first.
+
     rimraf(directory, (err) => {
         if (err) throw err;
         callback(true);
