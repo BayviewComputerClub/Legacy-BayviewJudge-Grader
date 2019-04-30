@@ -14,6 +14,12 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
 RUN apt-get update
 RUN apt-get install -y nodejs
 
+# Install build support for C/C++
+RUN apt-get install -y build-essential
+
+# Install OpenJDK build support for Java
+RUN apt-get install default-jdk
+
 # Create judge user
 RUN useradd judge
 
@@ -26,8 +32,6 @@ RUN mkdir /etc/service/grader
 COPY daemon.sh /etc/service/grader/run
 RUN chmod +x /etc/service/grader/run
 
-# Install build support for C/C++
-RUN apt-get install -y build-essential
 
 # Clean up APT when done.
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
