@@ -58,8 +58,12 @@ function execCppFile(submissionRequest, callback) {
 
     });
 
-    // todo TLE
-    setTimeout(function(){ inputProcess.stdin.end(); inputProcess.kill(); }, 3000);
+    // Handle a TLE
+    setTimeout(function(){
+        inputProcess.stdin.end();
+        inputProcess.kill();
+        callback(false, inputProcessOutput);
+    }, submissionRequest.timelimit);
 
 
 }
@@ -103,8 +107,11 @@ function execJavaFile(submissionRequest, callback) {
 
     });
 
-    // todo TLE
-    setTimeout(function(){ inputProcess.stdin.end(); inputProcess.kill(); }, 3000);
+    setTimeout(function(){
+        inputProcess.stdin.end();
+        inputProcess.kill();
+        callback(false, inputProcessOutput);
+    }, submissionRequest.timelimit);
 
 
 }

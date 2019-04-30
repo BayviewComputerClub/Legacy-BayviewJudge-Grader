@@ -36,13 +36,13 @@ function scoreOutput(output, expectedOutput, callback) {
     return;
 }
 
-function judgeSubmission(problemID, userID, inputCode, lang, input, output, callback) {
+function judgeSubmission(problemID, userID, inputCode, lang, input, output, timelimit, callback) {
     console.log("[Info] Judging a submission.");
     let judgeResult = {accepted: false, time: -1, isTLE: false, isCompileError: false, otherError: false, errorAt: -1, score: -1};
 
     // Create a submission request object.
     // input & output are the expected test case
-    let submissionRequest = {problemID: problemID, userID: userID, inputCode: inputCode, lang: lang, input: input, output: output};
+    let submissionRequest = {problemID: problemID, userID: userID, inputCode: inputCode, lang: lang, input: input, output: output, timelimt: timelimit};
 
     const problemRoot = './problems/' + problemID;
 
@@ -100,6 +100,11 @@ function judgeSubmission(problemID, userID, inputCode, lang, input, output, call
                 ExecCore.execSubmission(submissionRequest, (execResult, inputProcessOutput) => {
                     console.log("***** We have exec the file");
                     console.log(inputProcessOutput[0]);
+                    if(!execResult) {
+                        judgeResult.isTLE = true;
+                        callback(judgeResult);
+                        return;
+                    }
 
                     scoreOutput(inputProcessOutput, submissionRequest.output, function(score, isAccepeted, errorAt) {
                         if(isAccepeted === false) {
