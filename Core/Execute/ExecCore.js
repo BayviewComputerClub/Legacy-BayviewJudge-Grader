@@ -108,8 +108,8 @@ function execJavaFile(submissionRequest, callback) {
     });
 
     setTimeout(function(){
-        inputProcess.stdin.end();
-        inputProcess.kill();
+        //inputProcess.stdin.end();
+        //inputProcess.kill();
         callback(false, inputProcessOutput);
     }, submissionRequest.timelimit);
 
