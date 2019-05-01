@@ -21,12 +21,25 @@ function execSubmission(submissionRequest, callback) {
 
 function execCppFile(submissionRequest, callback) {
 
+    console.log("[Info] Executing a C++ program");
+
     let directory = './tmp/' + submissionRequest.userID + '/' + submissionRequest.problemID + '/source.out';
     // Create directory first.
     // Time for some fun... run and judge the solution!
     // Enable Firejail on the Linux server.
     //let inputProcess = spawn('firejail', ['--seccomp', '--quiet', '--net=none', './tmp/' + userID + '.out']);
     let inputProcess = spawn(directory, []);
+
+    let hasTLE = false;
+
+    console.log("TLE set to: " + submissionRequest.timelimit);
+    let tletimer = setTimeout(function(){
+        console.log("Reached TLE!");
+        hasTLE = true;
+        inputProcess.stdin.end();
+        inputProcess.kill();
+        callback(false, inputProcessOutput);
+    }, submissionRequest.timelimit);
 
     inputProcess.stdin.setEncoding('utf-8');
     //inputProcess.stdout.pipe(process.stdout); // debug
@@ -49,26 +62,27 @@ function execCppFile(submissionRequest, callback) {
 
     // When the program exits.
     inputProcess.on('close', function(code) {
-        // Judge the captured output of the program
-        for(let i of inputProcessOutput) { //debug
-            console.log('WHATS IN THE ' + i);
-        }
-        callback(true, inputProcessOutput);
+        if(hasTLE) {
+            console.log("Program exited but has TLE first.")
+        } else {
+            console.log("Program exited and made it on time")
+            // Judge the captured output of the program
+            for(let i of inputProcessOutput) { //debug
+                console.log('WHATS IN THE ' + i);
+            }
+            clearTimeout(tletimer);
 
+            callback(true, inputProcessOutput);
+        }
 
     });
-
-    // Handle a TLE
-    setTimeout(function(){
-        inputProcess.stdin.end();
-        inputProcess.kill();
-        callback(false, inputProcessOutput);
-    }, submissionRequest.timelimit);
 
 
 }
 
 function execJavaFile(submissionRequest, callback) {
+
+    console.log("[Info] Executing a Java program");
 
     let directory = './tmp/' + submissionRequest.userID + '/' + submissionRequest.problemID;
     // Create directory first.
@@ -76,6 +90,17 @@ function execJavaFile(submissionRequest, callback) {
     // Enable Firejail on the Linux server.
     //let inputProcess = spawn('firejail', ['--seccomp', '--quiet', '--net=none', './tmp/' + userID + '.out']);
     let inputProcess = spawn('cd ' + directory + ' && java Main' ,{ shell: true });
+
+    let hasTLE = false;
+
+    console.log("TLE set to: " + submissionRequest.timelimit);
+    let tletimer = setTimeout(function(){
+        console.log("Reached TLE!");
+        hasTLE = true;
+        inputProcess.stdin.end();
+        inputProcess.kill();
+        callback(false, inputProcessOutput);
+    }, submissionRequest.timelimit);
 
     inputProcess.stdin.setEncoding('utf-8');
     //inputProcess.stdout.pipe(process.stdout); // debug
@@ -98,20 +123,21 @@ function execJavaFile(submissionRequest, callback) {
 
     // When the program exits.
     inputProcess.on('close', function(code) {
-        // Judge the captured output of the program
-        for(let i of inputProcessOutput) { //debug
-            console.log('WHATS IN THE ' + i);
+        if(hasTLE) {
+            console.log("Program exited but has TLE first.")
+        } else {
+            console.log("Program exited and made it on time")
+            // Judge the captured output of the program
+            for(let i of inputProcessOutput) { //debug
+                console.log('WHATS IN THE ' + i);
+            }
+            clearTimeout(tletimer);
+
+            callback(true, inputProcessOutput);
         }
-        callback(true, inputProcessOutput);
 
 
     });
-
-    setTimeout(function(){
-        //inputProcess.stdin.end();
-        //inputProcess.kill();
-        callback(false, inputProcessOutput);
-    }, submissionRequest.timelimit);
 
 
 }

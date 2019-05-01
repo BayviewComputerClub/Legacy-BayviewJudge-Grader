@@ -42,7 +42,7 @@ function judgeSubmission(problemID, userID, inputCode, lang, input, output, time
 
     // Create a submission request object.
     // input & output are the expected test case
-    let submissionRequest = {problemID: problemID, userID: userID, inputCode: inputCode, lang: lang, input: input, output: output, timelimt: 1000};
+    let submissionRequest = {problemID: problemID, userID: userID, inputCode: inputCode, lang: lang, input: input, output: output, timelimit: timelimit};
 
     const problemRoot = './problems/' + problemID;
 
