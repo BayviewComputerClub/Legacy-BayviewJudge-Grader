@@ -26,6 +26,8 @@ RUN useradd judge
 # Copy the grader server files to the container
 RUN mkdir -p /home/judge/grader
 COPY --chown=judge:judge . /home/judge/grader
+# Run npm to install the packages.
+run cd /home/judge/grader && npm install
 
 # Copy the runit file
 RUN mkdir /etc/service/grader
