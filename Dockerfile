@@ -6,7 +6,10 @@ FROM phusion/baseimage:0.10.2
 # Use baseimage-docker's init system.
 CMD ["/sbin/my_init"]
 
-RUN apt-get update
+# Pull the latest Ubuntu updates
+RUN apt-get update && apt-get upgrade -y -o Dpkg::Options::="--force-confold"
+
+# Install sudo
 RUN apt-get install -y sudo
 
 # Install NodeJS
