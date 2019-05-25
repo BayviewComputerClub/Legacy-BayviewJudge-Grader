@@ -42,6 +42,10 @@ function judgeSubmission(problemID, userID, inputCode, lang, input, output, time
 
     // Create a submission request object.
     // input & output are the expected test case
+
+    input = input.replace('\r\n', '\n');
+    output = output.replace('\r\n', '\n');
+
     let submissionRequest = {problemID: problemID, userID: userID, inputCode: inputCode, lang: lang, input: input, output: output, timelimit: timelimit};
 
     const problemRoot = './problems/' + problemID;
