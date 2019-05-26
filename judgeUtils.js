@@ -28,8 +28,8 @@ function scoreOutput(output, expectedOutput, callback) {
             break;
         }
 
-        let strippedExpectedOuput = expectedOutput[i].replace(/(\r\n|\n|\r)/gm, "");
-        let strippedOutput = output[i].replace(/(\r\n|\n|\r)/gm, "");
+        let strippedExpectedOuput = expectedOutput[i].replace(/(\r\n|\n|\r)/gm, "").trim();
+        let strippedOutput = output[i].replace(/(\r\n|\n|\r)/gm, "").trim();
         if(strippedExpectedOuput === strippedOutput) {
             console.log("[Debug] Right answer! Expected: " + strippedExpectedOuput + " and got: " + strippedOutput);
             score++;
