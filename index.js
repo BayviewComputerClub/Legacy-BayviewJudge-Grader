@@ -24,7 +24,7 @@ const port = 3000;
 const judgeUtils = require('./judgeUtils');
 
 // Setup middleware to parse JSON
-app.use(express.json());
+app.use(express.json({limit: '128mb', extended: true}));
 
 app.get('/', function (req, res) {
     res.send('Hello World!')
