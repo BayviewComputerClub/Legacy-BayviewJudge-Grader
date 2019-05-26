@@ -6,14 +6,14 @@ function compileSubmission(submissionRequest, callback) {
 
     switch(submissionRequest.lang) {
         case "c++":
-            compileCppSubmission(submissionRequest, (result) => {
-                callback(result);
+            compileCppSubmission(submissionRequest, (result, err) => {
+                callback(result, err);
                 return;
             });
             break;
         case "java":
-            compileJavaSubmission(submissionRequest, (result) => {
-                callback(result);
+            compileJavaSubmission(submissionRequest, (result, err) => {
+                callback(result, err);
                 return;
             });
             break;
@@ -34,10 +34,10 @@ function compileCppSubmission(submissionRequest, callback) {
     exec(compileCommand, (err, stdout, stderr) => {
         if (err) {
             console.log('File compile ERROR ' + err);
-            callback(false);
+            callback(false, err);
             return;
         }
-        callback(true);
+        callback(true, "None");
         return;
     });
 }
@@ -51,10 +51,10 @@ function compileJavaSubmission(submissionRequest, callback) {
     exec(compileCommand, (err, stdout, stderr) => {
         if (err) {
             console.log('File compile ERROR ' + err);
-            callback(false);
+            callback(false, err);
             return;
         }
-        callback(true);
+        callback(true, "None");
         return;
     });
 }

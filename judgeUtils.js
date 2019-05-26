@@ -46,7 +46,7 @@ function scoreOutput(output, expectedOutput, callback) {
 
 function judgeSubmission(problemID, userID, inputCode, lang, input, output, timelimit, callback) {
     console.log("[Info] Judging a submission.");
-    let judgeResult = {accepted: false, time: -1, isTLE: false, isCompileError: false, otherError: false, errorAt: -1, score: -1};
+    let judgeResult = {accepted: false, time: -1, isTLE: false, isCompileError: false, otherError: false, errorAt: -1, score: -1, errorContent: ""};
 
     // Create a submission request object.
     // input & output are the expected test case
@@ -95,11 +95,13 @@ function judgeSubmission(problemID, userID, inputCode, lang, input, output, time
         //firejail --apparmor --private --net=none --quiet
 
 
-        CompileCore.compileSubmission(submissionRequest, (compileResult) => {
+        CompileCore.compileSubmission(submissionRequest, (compileResult, err) => {
             console.log("***** We have compileda the file");
             if(!compileResult) {
                 // Error in file compile (i.e CE), set it in the result object
                 judgeResult.isCompileError = true;
+                judgeResult.errorContent = err;
+
                 callback(judgeResult);
                 return;
             }
