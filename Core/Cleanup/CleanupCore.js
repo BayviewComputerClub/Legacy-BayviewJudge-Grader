@@ -17,6 +17,14 @@ function cleanupSubmission(submissionRequest, callback) {
                 return;
             });
             break;
+        case "python":
+            /*cleanupCppFile(submissionRequest, (result) => {
+                callback(result);
+                return;
+            });*/
+            callback(true);
+            break;
+
 
     }
 }

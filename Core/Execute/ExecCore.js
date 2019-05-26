@@ -16,6 +16,12 @@ function execSubmission(submissionRequest, callback) {
                 return;
             });
             break;
+        case "python":
+            execPythonFile(submissionRequest, (result, inputProcessOutput) => {
+                callback(result, inputProcessOutput);
+                return;
+            });
+            break;
     }
 }
 
@@ -104,13 +110,78 @@ function execJavaFile(submissionRequest, callback) {
     }, submissionRequest.timelimit);
 
     inputProcess.stdin.setEncoding('utf-8');
-    //inputProcess.stdout.pipe(process.stdout); // debug
 
     // Capture the programs output as it happens
     let inputProcessOutput = [];
     inputProcess.stdout.on('data', function(data) {
         console.log(data.toString());
         inputProcessOutput.push(data.toString());
+    });
+
+    // Write the test case data into the program.
+    for(let i of submissionRequest.input) {
+        //console.log('this is i ' + i)
+        inputProcess.stdin.write(i + '\n');
+    }
+
+    // When the program exits.
+    inputProcess.on('close', function(code) {
+        if(hasTLE) {
+            console.log("Program exited but has TLE first.")
+        } else {
+            console.log("Program exited and made it on time")
+            // Judge the captured output of the program
+
+            let fullString = "";
+            for(let i of inputProcessOutput) { //debug
+                console.log('WHATS IN THE ' + i);
+                fullString = fullString + i;
+            }
+            clearTimeout(tletimer);
+            console.log("[DEBUG] The stringed output is: " + fullString);
+
+            callback(true, fullString.split("\n"));
+        }
+
+
+    });
+
+
+}
+
+function execPythonFile(submissionRequest, callback) {
+
+    console.log("[Info] Executing a Python program");
+
+    let directory = './tmp/' + submissionRequest.userID + '/' + submissionRequest.problemID;
+    // Create directory first.
+    // Time for some fun... run and judge the solution!
+    // Enable Firejail on the Linux server.
+    //let inputProcess = spawn('firejail', ['--seccomp', '--quiet', '--net=none', './tmp/' + userID + '.out']);
+    let inputProcess = spawn('cd ' + directory + ' && python3 -u Main.py' ,{ shell: true });
+
+    let hasTLE = false;
+
+    console.log("TLE set to: " + submissionRequest.timelimit);
+    let tletimer = setTimeout(function(){
+        console.log("Reached TLE!");
+        hasTLE = true;
+        inputProcess.stdin.end();
+        inputProcess.kill();
+        callback(false, inputProcessOutput);
+    }, submissionRequest.timelimit);
+
+    inputProcess.stdin.setEncoding('utf-8');
+
+    // Capture the programs output as it happens
+    let inputProcessOutput = [];
+    inputProcess.stdout.on('data', function(data) {
+        console.log(data.toString());
+        inputProcessOutput.push(data.toString());
+    });
+
+    inputProcess.stderr.on('data', function(data) {
+        console.log("[Python ERROR] " + data.toString());
     });
 
     // Write the test case data into the program.

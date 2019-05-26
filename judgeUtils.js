@@ -51,9 +51,6 @@ function judgeSubmission(problemID, userID, inputCode, lang, input, output, time
     // Create a submission request object.
     // input & output are the expected test case
 
-    input = input.replace('\r\n', '\n');
-    output = output.replace('\r\n', '\n');
-
     let submissionRequest = {problemID: problemID, userID: userID, inputCode: inputCode, lang: lang, input: input, output: output, timelimit: timelimit};
 
     const problemRoot = './problems/' + problemID;
@@ -64,8 +61,8 @@ function judgeSubmission(problemID, userID, inputCode, lang, input, output, time
     //const testInput = fs.readFileSync(problemRoot + '/in.txt').toString().split("\n");
     //const testOutput = fs.readFileSync(problemRoot + '/out.txt').toString().split("\n");
 
-    const testInput = new Buffer(input, 'base64').toString('ascii').split("\n");
-    const testOutput = new Buffer(output, 'base64').toString('ascii').split("\n");
+    const testInput = new Buffer(input, 'base64').toString('ascii').replace('\r', '').split("\n");
+    const testOutput = new Buffer(output, 'base64').toString('ascii').replace('\r', '').split("\n");
 
     // Place decoded JSON into request object
     submissionRequest.input = testInput;

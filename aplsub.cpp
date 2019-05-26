@@ -32,3 +32,4 @@ int main() {
     cout << ((a*b == c) ? "AC" : "WA") << endl;
     return 0;
 }
+

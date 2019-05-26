@@ -16,6 +16,11 @@ function stageSubmission(submissionRequest, callback) {
             callback(true);
             return;
             break;
+        case "python":
+            // There is nothing to do here.
+            callback(true);
+            return;
+            break;
     }
 }
 

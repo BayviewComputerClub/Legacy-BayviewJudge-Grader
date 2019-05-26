@@ -16,6 +16,12 @@ function prepareSubmission(submissionRequest, callback) {
                 return;
             });
             break;
+        case "python":
+            writePythonFile(submissionRequest, (result) => {
+                callback(result);
+                return;
+            });
+            break;
     }
 }
 
@@ -42,6 +48,22 @@ function writeJavaFile(submissionRequest, callback) {
         if (err) throw err;
         //Write file to problem dir
         fs.writeFile(directory + '/Main.java', submissionRequest.inputCode, (err) => {
+            if (err) throw err;
+            callback(true);
+            return;
+        });
+    });
+
+
+}
+
+function writePythonFile(submissionRequest, callback) {
+    let directory = './tmp/' + submissionRequest.userID + '/' + submissionRequest.problemID;
+    // Create directory first.
+    fs.mkdir(directory, { recursive: true }, (err) => {
+        if (err) throw err;
+        //Write file to problem dir
+        fs.writeFile(directory + '/Main.py', submissionRequest.inputCode, (err) => {
             if (err) throw err;
             callback(true);
             return;

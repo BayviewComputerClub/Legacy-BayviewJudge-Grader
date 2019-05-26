@@ -17,6 +17,11 @@ function compileSubmission(submissionRequest, callback) {
                 return;
             });
             break;
+        case "python":
+            // There is nothing to do here.
+            callback(true);
+            return;
+            break;
     }
 }
 
@@ -53,6 +58,8 @@ function compileJavaSubmission(submissionRequest, callback) {
         return;
     });
 }
+
+
 
 module.exports = {
     compileSubmission: compileSubmission
