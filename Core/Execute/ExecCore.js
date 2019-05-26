@@ -47,11 +47,8 @@ function execCppFile(submissionRequest, callback) {
     // Capture the programs output as it happens
     let inputProcessOutput = [];
     inputProcess.stdout.on('data', function(data) {
-        console.log('******************* got data and pushing it... ' + data.toString().split("\n"));
-        console.log(typeof data.toString().split("\n"));
-        let dataOutput = data.toString().split("\n");
-        inputProcessOutput = inputProcessOutput.concat(dataOutput);
-        inputProcessOutput.pop();
+        console.log(data.toString());
+        inputProcessOutput.push(data.toString());
     });
 
     // Write the test case data into the program.
@@ -67,12 +64,16 @@ function execCppFile(submissionRequest, callback) {
         } else {
             console.log("Program exited and made it on time")
             // Judge the captured output of the program
+
+            let fullString = "";
             for(let i of inputProcessOutput) { //debug
                 console.log('WHATS IN THE ' + i);
+                fullString = fullString + i;
             }
             clearTimeout(tletimer);
+            console.log("[DEBUG] The stringed output is: " + fullString);
 
-            callback(true, inputProcessOutput);
+            callback(true, fullString.split("\n"));
         }
 
     });
@@ -108,11 +109,8 @@ function execJavaFile(submissionRequest, callback) {
     // Capture the programs output as it happens
     let inputProcessOutput = [];
     inputProcess.stdout.on('data', function(data) {
-        console.log('******************* got data and pushing it... ' + data.toString().split("\n"));
-        console.log(typeof data.toString().split("\n"));
-        let dataOutput = data.toString().split("\n");
-        inputProcessOutput = inputProcessOutput.concat(dataOutput);
-        //inputProcessOutput.pop();
+        console.log(data.toString());
+        inputProcessOutput.push(data.toString());
     });
 
     // Write the test case data into the program.
@@ -128,12 +126,16 @@ function execJavaFile(submissionRequest, callback) {
         } else {
             console.log("Program exited and made it on time")
             // Judge the captured output of the program
+
+            let fullString = "";
             for(let i of inputProcessOutput) { //debug
                 console.log('WHATS IN THE ' + i);
+                fullString = fullString + i;
             }
             clearTimeout(tletimer);
+            console.log("[DEBUG] The stringed output is: " + fullString);
 
-            callback(true, inputProcessOutput);
+            callback(true, fullString.split("\n"));
         }
 
 
