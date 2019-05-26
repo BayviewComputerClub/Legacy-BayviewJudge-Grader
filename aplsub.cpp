@@ -20,3 +20,15 @@ public class Main {
             System.out.println(a + b);
     }
 }
+
+
+#include <iostream>
+
+using namespace std;
+
+int main() {
+    int a, b, c;
+    cin >> a; cin >> b; cin >> c;
+    cout << ((a*b == c) ? "AC" : "WA") << endl;
+    return 0;
+}

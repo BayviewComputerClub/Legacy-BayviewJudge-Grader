@@ -20,6 +20,14 @@ function scoreOutput(output, expectedOutput, callback) {
         // Ignore newlines in the test cases
         //console.log("*********LOOK AT THIS:" + typeof expectedOutput[i] + " - " + typeof output[i]);
         console.log("[Debug] Judge Iteration " + i);
+
+        // Bug with C++ programs
+        if (typeof output[i] == 'undefined') {
+            console.log('[Error] Output[i] is undefined.');
+            output = "error";
+            break;
+        }
+
         let strippedExpectedOuput = expectedOutput[i].replace(/(\r\n|\n|\r)/gm, "");
         let strippedOutput = output[i].replace(/(\r\n|\n|\r)/gm, "");
         if(strippedExpectedOuput === strippedOutput) {
@@ -65,6 +73,7 @@ function judgeSubmission(problemID, userID, inputCode, lang, input, output, time
 
     console.log('[Info] Parsed Input and Output Cases');
     console.log('[Debug] Input Cases: ' + testInput[0]);
+    console.log('[Debug] Input Cases 2: ' + testInput[1]);
     console.log('[Debug] Output Cases: ' + testOutput[0]);
 
 
