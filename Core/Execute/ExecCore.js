@@ -53,6 +53,7 @@ function execCppFile(submissionRequest, callback) {
     // Capture the programs output as it happens
     let inputProcessOutput = [];
     inputProcess.stdout.on('data', function(data) {
+        console.log("Data from program *************: " + data.toString());
         console.log(data.toString());
         inputProcessOutput.push(data.toString());
     });
