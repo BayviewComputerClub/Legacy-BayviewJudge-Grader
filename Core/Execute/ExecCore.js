@@ -59,10 +59,13 @@ function execCppFile(submissionRequest, callback) {
     });
 
     // Write the test case data into the program.
-    for(let i of submissionRequest.input) {
-        //console.log('this is i ' + i;
-        inputProcess.stdin.write(i + '\n');
-    }
+    setTimeout (function() {
+        for(let i of submissionRequest.input) {
+            //console.log('this is i ' + i;
+            inputProcess.stdin.write(i + '\n');
+        }
+    }, 5000); // debug
+
 
     // When the program exits.
     inputProcess.on('close', function(code) {
