@@ -91,6 +91,13 @@ function execCppFile(submissionRequest, callback) {
 
     });
 
+    process.stdout.on('error', function( err ) {
+        if (err.code == "EPIPE") {
+            console.log("THE PROGRAM DIEEEEEEDDDDDD");
+            process.exit(0);
+        }
+    });
+
 
 }
 
