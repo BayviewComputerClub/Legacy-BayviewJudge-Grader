@@ -69,9 +69,7 @@ function execCppFile(submissionRequest, callback) {
 
     // When the program exits.
     inputProcess.on('close', function(code) {
-        if(hasTLE) {
-            console.log("Program exited but has TLE first.")
-        } else {
+
             console.log("Program exited and made it on time")
             // Judge the captured output of the program
 
@@ -84,7 +82,7 @@ function execCppFile(submissionRequest, callback) {
             console.log("[DEBUG] The stringed output is: " + fullString);
 
             callback(true, fullString.split("\n"));
-        }
+        
 
     });
 
