@@ -34,6 +34,7 @@ app.get('/v1/judge-submission', function (req, res) {
     res.send('403 Forbidden');
 });
 app.post('/v1/judge-submission', function (req, res) {
+    console.log("~~ We got a new request ~~");
     judgeUtils.judgeSubmission(req.body.problemID, req.body.userID, req.body.inputCode, req.body.lang, req.body.input, req.body.output, req.body.timelimit,function(result) {
         res.send(result);
     });

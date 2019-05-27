@@ -42,9 +42,9 @@ function execCppFile(submissionRequest, callback) {
     let tletimer = setTimeout(function(){
         console.log("Reached TLE!");
         hasTLE = true;
-        inputProcess.stdin.end();
-        inputProcess.kill();
-        callback(false, inputProcessOutput);
+        //inputProcess.stdin.end();
+        //inputProcess.kill();
+        //callback(false, inputProcessOutput);
     }, submissionRequest.timelimit);
 
     inputProcess.stdin.setEncoding('utf-8');
