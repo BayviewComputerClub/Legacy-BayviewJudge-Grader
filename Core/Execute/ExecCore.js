@@ -61,13 +61,7 @@ function execCppFile(submissionRequest, callback) {
     // Write the test case data into the program.
     for(let i of submissionRequest.input) {
         //console.log('this is i ' + i;
-        let split_input = i.split(" ");
-        console.log("Split input by space"); // fix?
-        for(let x of split_input) {
-            console.log("**** Pushing a split input to the program: " + x);
-            inputProcess.stdin.write(x);
-        }
-        inputProcess.stdin.write('\n');
+        inputProcess.stdin.write(i + '\n');
     }
 
     // When the program exits.
@@ -111,9 +105,9 @@ function execJavaFile(submissionRequest, callback) {
     let tletimer = setTimeout(function(){
         console.log("Reached TLE!");
         hasTLE = true;
-        inputProcess.stdin.end();
-        inputProcess.kill();
-        callback(false, inputProcessOutput);
+        //inputProcess.stdin.end();
+        //inputProcess.kill();
+        //callback(false, inputProcessOutput);
     }, submissionRequest.timelimit);
 
     inputProcess.stdin.setEncoding('utf-8');
