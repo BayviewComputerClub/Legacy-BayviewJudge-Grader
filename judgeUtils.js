@@ -8,7 +8,7 @@ const PrepareCore = require('./Core/Prepare/PrepareCore');
 const StageCore = require('./Core/Stage/StageCore');
 const ExecCore = require('./Core/Execute/ExecCore');
 const CleanupCore = require('./Core/Cleanup/CleanupCore');
-
+require('epipebomb')()
 
 function scoreOutput(output, expectedOutput, callback) {
     let score = 0;

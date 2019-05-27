@@ -19,6 +19,7 @@
 const express = require('express');
 const app = express();
 const port = 3000;
+require('epipebomb')()
 
 // Load server parts
 const judgeUtils = require('./judgeUtils');

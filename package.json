@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/BayviewComputerClub/BayviewJudge-Grader#readme",
   "dependencies": {
+    "epipebomb": "^1.0.0",
     "express": "^4.16.4",
     "rimraf": "^2.6.3"
   },

@@ -1,5 +1,6 @@
 const fs = require("fs");
 const { spawn, exec } = require('child_process');
+require('epipebomb')()
 
 function execSubmission(submissionRequest, callback) {
     // Write the submission to a file.
