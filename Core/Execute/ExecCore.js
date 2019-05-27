@@ -59,11 +59,16 @@ function execCppFile(submissionRequest, callback) {
     });
 
     // Write the test case data into the program.
-    for(let i of submissionRequest.input) {
-        //console.log('this is i ' + i;
-        console.log("~~ We are about to write some data. Will it crash? ~~");
-        inputProcess.stdin.write(i + '\n');
+    try {
+        for(let i of submissionRequest.input) {
+            //console.log('this is i ' + i;
+            console.log("~~ We are about to write some data. Will it crash? ~~");
+            inputProcess.stdin.write(i + '\n');
+        }
+    } catch (e) {
+        console.log("!!!!!! There was an e: " + e);
     }
+
 
     // When the program exits.
     inputProcess.on('close', function(code) {
@@ -78,7 +83,7 @@ function execCppFile(submissionRequest, callback) {
                 console.log('WHATS IN THE ' + i);
                 fullString = fullString + i;
             }
-            clearTimeout(tletimer);
+            //clearTimeout(tletimer);
             console.log("[DEBUG] The stringed output is: " + fullString);
 
             callback(true, fullString.split("\n"));
