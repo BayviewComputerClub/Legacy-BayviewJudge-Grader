@@ -39,13 +39,13 @@ function execCppFile(submissionRequest, callback) {
     let hasTLE = false;
 
     console.log("TLE set to: " + submissionRequest.timelimit);
-    let tletimer = setTimeout(function(){
+    /*let tletimer = setTimeout(function(){
         console.log("Reached TLE!");
         hasTLE = true;
         inputProcess.stdin.end();
         inputProcess.kill();
         callback(false, inputProcessOutput);
-    }, submissionRequest.timelimit);
+    }, submissionRequest.timelimit);*/
 
     inputProcess.stdin.setEncoding('utf-8');
     //inputProcess.stdout.pipe(process.stdout); // debug
