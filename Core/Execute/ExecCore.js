@@ -42,9 +42,9 @@ function execCppFile(submissionRequest, callback) {
     let tletimer = setTimeout(function(){
         console.log("Reached TLE!");
         hasTLE = true;
-        //inputProcess.stdin.end();
-        //inputProcess.kill();
-        //callback(false, inputProcessOutput);
+        inputProcess.stdin.end();
+        inputProcess.kill();
+        callback(false, inputProcessOutput);
     }, submissionRequest.timelimit);
 
     inputProcess.stdin.setEncoding('utf-8');
@@ -59,17 +59,17 @@ function execCppFile(submissionRequest, callback) {
     });
 
     // Write the test case data into the program.
-    setTimeout (function() {
-        for(let i of submissionRequest.input) {
-            //console.log('this is i ' + i;
-            inputProcess.stdin.write(i + '\n');
-        }
-    }, 5000); // debug
-
+    for(let i of submissionRequest.input) {
+        //console.log('this is i ' + i;
+        console.log("~~ We are about to write some data. Will it crash? ~~");
+        inputProcess.stdin.write(i + '\n');
+    }
 
     // When the program exits.
     inputProcess.on('close', function(code) {
-
+        if(hasTLE) {
+            console.log("Program exited but has TLE first.")
+        } else {
             console.log("Program exited and made it on time")
             // Judge the captured output of the program
 
@@ -82,7 +82,7 @@ function execCppFile(submissionRequest, callback) {
             console.log("[DEBUG] The stringed output is: " + fullString);
 
             callback(true, fullString.split("\n"));
-        
+        }
 
     });
 
