@@ -61,8 +61,8 @@ function judgeSubmission(problemID, userID, inputCode, lang, input, output, time
     //const testInput = fs.readFileSync(problemRoot + '/in.txt').toString().split("\n");
     //const testOutput = fs.readFileSync(problemRoot + '/out.txt').toString().split("\n");
 
-    const testInput = new Buffer(input, 'base64').toString('ascii').replace('\r', '').split("\n");
-    const testOutput = new Buffer(output, 'base64').toString('ascii').replace('\r', '').split("\n");
+    const testInput = input.replace('\r', '').split("\n");
+    const testOutput = output.replace('\r', '').split("\n");
 
     // Place decoded JSON into request object
     submissionRequest.input = testInput;
