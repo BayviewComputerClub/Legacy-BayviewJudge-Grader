@@ -60,8 +60,14 @@ function execCppFile(submissionRequest, callback) {
 
     // Write the test case data into the program.
     for(let i of submissionRequest.input) {
-        //console.log('this is i ' + i)
-        inputProcess.stdin.write(i + '\n');
+        //console.log('this is i ' + i;
+        let split_input = i.split(" ");
+        console.log("Split input by space"); // fix?
+        for(let x of split_input) {
+            console.log("**** Pushing a split input to the program: " + x);
+            inputProcess.stdin.write(x);
+        }
+        inputProcess.stdin.write('\n');
     }
 
     // When the program exits.
